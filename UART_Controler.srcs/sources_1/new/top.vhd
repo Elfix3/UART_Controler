@@ -67,6 +67,7 @@ architecture Behavioral of top is
     
 
     --clean buttonOutputs, produced by the debouncer
+    signal clean_Buttons : std_logic_vector(2 downto 0);
     signal clean_btnR : std_logic := '0';
     signal clean_btnC : std_logic := '0';
     signal clean_btnU : std_logic := '0';
@@ -79,7 +80,7 @@ architecture Behavioral of top is
     
     
     --whatever go my counter
-    signal counter      : integer := 0;
+    signal counter : integer := 0;
     
     --states
     type t_state is(IDLE, SEND_BYTE, DELAY,  MEMORY_INCREMENT);
@@ -93,23 +94,15 @@ architecture Behavioral of top is
         
         values <= recievedByte & sw;
         
+        clean_btnC <= clean_buttons(2);
+        clean_btnR <= clean_buttons(1);
+        clean_btnU <= clean_buttons(0);
         
-        DBOUNCE_R : entity work.debouncer port map(
-            raw => btnR,
+        BUTTONS_DBOUNCER : entity work.debouncer generic map(n => 3)
+        port map(
+            raw => btnC & btnR & btnU,
             clk => clk,
-            clean => clean_btnR
-        );
-        
-        DBOUNCE_C : entity work.debouncer port map(
-            raw => btnC,
-            clk => clk,
-            clean => clean_btnC
-        );
-        
-        DBOUNCE_U : entity work.debouncer port map(
-            raw => btnU,
-            clk => clk,
-            clean => clean_btnU
+            clean => clean_Buttons
         );
         
         CLK_DIVIDER : entity work.clock_divider port map(
@@ -131,16 +124,16 @@ architecture Behavioral of top is
             clk => clk,
             tick_9600 => tick_9600,
             send_byte_signal => send_byte_signal,
-            tx_line => tx_line,
-            tx_done => tx_done         
+            tx_line => tx_line    
         );
         
---        RX : entity work.rx_reciever port map(
---            clk_9600 => clk_9600,
---            rx_line => rx_line,
---            byte => recievedByte,
---            parity => led
---        );
+        RX : entity work.rx_reciever port map(
+            rx_line => rx_line,
+            clk => clk,
+            tick_9600 => tick_9600,            
+            byte => recievedByte,
+            parity => led
+        );
         
         ROM : entity work.blk_mem_gen_0 port map(
             clka => clk,
@@ -148,8 +141,8 @@ architecture Behavioral of top is
             addra => address,
             douta => byteToSend
         );
-
-
+        
+        
         process(clk)
             variable memIndex : integer := 0;
             variable memStop : integer := 0;
@@ -162,19 +155,19 @@ architecture Behavioral of top is
                             if clean_btnR = '1' then
                                 current_state <= SEND_BYTE;
                                 memIndex := 0;
-                                memStop := 15;
+                                memStop := 16;
                             end if;
                             
                             if clean_btnC = '1' then
                                 current_state <= SEND_BYTE;
-                                memIndex := 15;
-                                memStop := 33;
+                                memIndex := 16;
+                                memStop := 35;
                             end if;
                             
                             if clean_btnU = '1' then
                                 current_state <= SEND_BYTE;
-                                memIndex :=33;
-                                memStop := 91;
+                                memIndex :=35;
+                                memStop := 90;
                             end if;
                         
                         when SEND_BYTE =>

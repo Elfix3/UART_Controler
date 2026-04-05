@@ -32,17 +32,19 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity debouncer is
+    Generic(N : integer := 1);
+
     Port (
-    raw : in std_logic;
+    raw : in std_logic_vector(n-1 downto 0);
     clk : in std_logic;
-    clean : out std_logic
+    clean : out std_logic_vector(n-1 downto 0)
     );
 end debouncer;
 
 architecture Behavioral of debouncer is
 
-    signal stable : std_logic := '0';
-    signal previous : std_logic := '1';
+    signal stable   : std_logic_vector(n-1 downto 0) := (others => '0');
+    signal previous : std_logic_vector(n-1 downto 0) := (others => '1');
     
 
 begin

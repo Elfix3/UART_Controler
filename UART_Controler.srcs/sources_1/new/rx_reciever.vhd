@@ -34,7 +34,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity rx_reciever is
     Port (
         rx_line : in std_logic;
-        clk_9600 : in std_logic;
+        clk : in std_logic;
+        tick_9600 : in std_logic;
         byte : out std_logic_vector(7 downto 0) := (others => '0');
         parity : out std_logic
     );
@@ -52,19 +53,21 @@ architecture Behavioral of rx_reciever is
             
             
             
-        process(clk_9600)
+        process(clk)
         variable bitPos : integer range 0 to 11 := 0;
             begin
-                if rising_edge(clk_9600) then
-                    if (rx_line = '0' and previous_rx = '1') or (bitPos > 0 and bitPos <= 10) then --falling edge detection
-                        recieveInProcess <= '1';
-                        full_data(bitPos) <= rx_line;
-                        bitPos := bitPos+1;
-                    elsif bitPos = 11 then --no parity check at the moment
-                        bitPos := 0;
-                        byte <= full_data(8 downto 1);
+                if rising_edge(clk) then
+                        if tick_9600 = '1' then
+                            if (rx_line = '0' and previous_rx = '1') or (bitPos > 0 and bitPos <= 10) then --falling edge detection
+                            recieveInProcess <= '1';
+                            full_data(bitPos) <= rx_line;
+                            bitPos := bitPos+1;
+                        elsif bitPos = 11 then --no parity check at the moment
+                            bitPos := 0;
+                            byte <= full_data(8 downto 1);
+                        end if;
+                        previous_rx <= rx_line;   
                     end if;
-                    previous_rx <= rx_line;   
                 end if;
             end process;
             parity <= full_data(9);
