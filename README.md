@@ -52,22 +52,22 @@ UART_Controler/
 
 ## 🧩 Module Overview
 
-### ⏱️ `clock_divider.vhd`
+###  `clock_divider.vhd`
 Generates a **9600 Hz tick** from the 100 MHz board clock by counting to 10 416. The tick drives both the TX and RX modules to ensure they sample and shift at the correct baud rate.
 
-### 📤 `tx_transmitter.vhd`
+###  `tx_transmitter.vhd`
 Transmits one byte over `tx_line` when `send_byte_signal` pulses high. Builds a full 11-bit frame on the fly: `start(0) | data[7:0] | parity(XOR) | stop(1)`. Bits are shifted out one per tick on a rising-edge of the baud tick.
 
-### 📥 `rx_reciever.vhd`
+###  `rx_reciever.vhd`
 Detects the falling edge of `rx_line` (start bit) and captures 11 bits at baud rate into a shift register. On completion, `byte[7:0]` is updated and the parity bit is forwarded to the `led` output for quick visual checking.
 
-### 🔘 `debouncer.vhd`
+###  `debouncer.vhd`
 A **generic N-channel debouncer** (parameterised with `N`). Counts 2²¹ cycles (~21 ms at 100 MHz) of input stability before passing a signal as clean. All three buttons (btnC, btnR, btnU) are debounced together as a 3-bit vector.
 
-### 🔢 `sw_to_7_seg.vhd`
+###  `sw_to_7_seg.vhd`
 Multiplexes a 16-bit value across the 4 seven-segment digits using a 20-bit refresh counter (~2.6 ms per digit). The upper byte shows the last received UART byte; the lower byte mirrors the 8 switches. Supports hexadecimal display (0–F).
 
-### 🔝 `top.vhd`
+###  `top.vhd`
 Top-level entity wiring all modules together. Contains a **4-state FSM** (`IDLE → SEND_BYTE → DELAY → back`) that walks through a ROM address range and fires one byte per iteration:
 
 | Button | ROM range | Content |
@@ -82,7 +82,7 @@ The ROM is a Xilinx Block Memory IP (`blk_mem_gen_0`, 4 KB, 12-bit address, 8-bi
 
 ## 🚀 Getting Started
 
-### 1️⃣ — Recreate the Vivado project
+### 1 — Recreate the Vivado project
 
 Open Vivado's Tcl console and run:
 
@@ -92,11 +92,11 @@ source UART_Controler.tcl
 
 This will recreate the project with all sources and constraints.
 
-### 2️⃣ — Add ROM content
+### 2️ — Add ROM content
 
 The design instantiates a Xilinx Block Memory Generator IP (`blk_mem_gen_0`). After recreating the project, re-generate the IP or provide your own `.coe` initialisation file with the byte sequences you want to send.
 
-### 3️⃣ — Synthesise, implement, and program
+### 3️ — Synthesise, implement, and program
 
 Run synthesis and implementation from Vivado, then program the Basys3 via USB. No external wiring is required if using the onboard USB-UART bridge.
 
