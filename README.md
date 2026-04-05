@@ -24,6 +24,8 @@ A UART controller implemented in VHDL and targeting the **Digilent Basys3** boar
 | Baud rate | 9600 |
 | Frame format | 1 start bit — 8 data bits — 1 parity bit (odd) — 1 stop bit |
 
+![](imgs/frame.png)
+
 ---
 
 ## 📁 Repository Structure
